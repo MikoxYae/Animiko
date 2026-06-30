@@ -152,7 +152,7 @@ main{min-height:100vh}
 
 /* ═══════════════════════ HERO — Auto-carousel ═══════════════════════ */
 .hero{
-  position:relative;height:88vh;min-height:520px;max-height:820px;
+  position:relative;height:72vh;min-height:420px;max-height:700px;
   overflow:hidden;background:var(--bg);
 }
 .hero-slide{
@@ -170,7 +170,7 @@ main{min-height:100vh}
 }
 .hero-copy{
   position:absolute;bottom:0;left:0;
-  z-index:2;padding:0 4% 64px;max-width:600px;
+  z-index:2;padding:0 4% 40px;max-width:600px;
 }
 .hero-tag{
   display:inline-flex;align-items:center;gap:6px;
@@ -987,7 +987,7 @@ td:last-child:hover{color:var(--cyan2)}
   .nav-links{display:none}
   .menu-btn{display:block}
   .mobile-panel{display:block}
-  .hero{height:70vh;min-height:440px}
+  .hero{height:58vh;min-height:360px}
   .hero h1{font-size:40px}
   .hero-copy{padding:0 5% 50px}
   .anime-card{width:135px}
@@ -1027,7 +1027,7 @@ td:last-child:hover{color:var(--cyan2)}
 
 @media(max-width:600px){
   .page-wrap{padding:0 4% 50px}
-  .hero{height:62vh;min-height:380px}
+  .hero{height:52vh;min-height:320px}
   .hero h1{font-size:30px;letter-spacing:-.6px}
   .hero-copy{padding:0 4% 36px}
   .hero p{font-size:13px}
@@ -1068,5 +1068,5 @@ td:last-child:hover{color:var(--cyan2)}
   .poster-wrap{width:118px;height:172px}
   .brand-name{font-size:14px}
   .hero h1{font-size:26px}
-  .hero{height:58vh;min-height:340px}
+  .hero{height:48vh;min-height:300px}
 }
