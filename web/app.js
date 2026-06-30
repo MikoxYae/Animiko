@@ -115,41 +115,88 @@ function card(a){
 function rowCards(list){ return `<div class="card-row">${list.map(a=>card(a)).join('')}</div>`; }
 function gridCards(list){ return `<div class="anime-grid">${list.map(a=>card(a)).join('')}</div>`; }
 
-function latestList(){
-  const eps = episodeData.slice(0,8);
-  return `<div class="latest-list">${eps.map(e=>{
-    const a = bySlug(e.animeSlug);
-    return `<a data-link href="/watch/${a.slug}/${e.episodeNumber}" class="episode-row">
-      <div class="ep-thumb">${img(e.thumbnailUrl,'','')}</div>
-      <div>
-        <b>${a.title}</b>
-        <span>Episode ${String(e.episodeNumber).padStart(2,'0')} &middot; ${e.releaseDate}</span>
-      </div>
-      <em>New</em>
-    </a>`;
-  }).join('')}</div>`;
+function latestList(filter='all'){
+  let eps = episodeData.slice(0, 12);
+  if(filter==='trending') eps = episodeData.slice(0,6).concat(episodeData.slice(10,16));
+  const tabs = ['all','sub','dub','trending'];
+  const tabLabels = {all:'All',sub:'Sub',dub:'Dub',trending:'Trending'};
+  return `
+    <div class="ep-filter-row">
+      ${tabs.map(t=>`<button class="ep-filter-tab ${filter===t?'active':''}" onclick="setEpFilter('${t}')">${tabLabels[t]}</button>`).join('')}
+    </div>
+    <div class="latest-list" id="latestListWrap">${eps.slice(0,8).map(e=>{
+      const a = bySlug(e.animeSlug);
+      return `<a data-link href="/watch/${a.slug}/${e.episodeNumber}" class="episode-row">
+        <div class="ep-thumb">${img(e.thumbnailUrl,'','')}</div>
+        <div>
+          <b>${a.title}</b>
+          <span>Ep ${String(e.episodeNumber).padStart(2,'0')} &middot; ${e.releaseDate}</span>
+        </div>
+        <em>New</em>
+      </a>`;
+    }).join('')}</div>`;
 }
+window.setEpFilter = (f)=>{
+  const wrap = document.getElementById('latestListWrap');
+  if(!wrap) return;
+  $$('.ep-filter-tab').forEach(t=>t.classList.toggle('active', t.textContent.toLowerCase()===f||( f==='all'&&t.textContent==='All')));
+};
 
 function hero(){
+  const featured = animeData.find(a=>a.slug==='jujutsu-kaisen') || animeData[0];
   return `<section class="hero" style="--hero:url('/assets/hero-main.jpg')">
+    <div class="hero-copy">
+      <span class="eyebrow">ᴛʀᴇɴᴅɪɴɢ ɴᴏᴡ &nbsp;&bull;&nbsp; HD &nbsp;&bull;&nbsp; ${featured.ageRating}</span>
+      <h1>Shadow Ronin</h1>
+      <div class="hero-meta-row">
+        <span class="hero-badge hd">HD</span>
+        <span class="hero-badge cc">CC</span>
+        <span class="hero-year">2024</span>
+        <span class="hero-dot"></span>
+        <span class="hero-genre">Action &bull; Samurai</span>
+      </div>
+      <p>A nameless ronin walks through a neon war era while hunted by memories and enemies. An epic tale of honor, betrayal and survival.</p>
+      <div class="hero-actions">
+        <a data-link href="/watch/shadow-ronin/1" class="btn primary hero-play-btn">&#9654;&nbsp; ᴡᴀᴛᴄʜ ɴᴏᴡ</a>
+        <a data-link href="/anime/shadow-ronin" class="btn muted">More Info</a>
+      </div>
+      <div class="dots">
+        <i class="active"></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <div class="hero-art-fade"></div>
     <button class="hero-arrow left">&lsaquo;</button>
     <button class="hero-arrow right">&rsaquo;</button>
-    <div class="hero-copy">
-      <span class="eyebrow">Premium anime library</span>
-      <h1>Stream Anime,<br>Discover Classics</h1>
-      <p>Explore the latest simulcasts, hidden gems, and timeless classics all in one beautifully curated place.</p>
-      <div class="hero-tags">
-        <span>Trending</span>
-        <span>HD Library</span>
-        <span>Old &amp; New</span>
-      </div>
-      <div class="hero-actions">
-        <a data-link href="/watch/shadow-ronin/1" class="btn primary">ᴡᴀᴛᴄʜ ɴᴏᴡ</a>
-        <a data-link href="/browse" class="btn muted">ʙʀᴏᴡsᴇ ʟɪʙʀᴀʀʏ</a>
-      </div>
-      <div class="dots"><i></i><i></i><i></i></div>
-    </div>
   </section>`;
+}
+
+function topRankings(){
+  const top = [...animeData].sort((a,b)=>b.rating-a.rating).slice(0,10);
+  return `<aside class="top-rankings">
+    <div class="rank-head">
+      <h3>ᴛᴏᴘ ᴀɴɪᴍᴇ</h3>
+      <div class="rank-tabs">
+        <button class="rank-tab active">Day</button>
+        <button class="rank-tab">Week</button>
+        <button class="rank-tab">Month</button>
+      </div>
+    </div>
+    <div class="rank-list">
+      ${top.map((a,i)=>`
+        <a data-link href="/anime/${a.slug}" class="rank-item">
+          <span class="rank-num ${i<3?'rank-top':''}">${i+1}</span>
+          ${img(a.posterUrl,'rank-thumb',a.title)}
+          <div class="rank-info">
+            <b>${a.title}</b>
+            <div class="rank-meta">
+              <span class="rank-badge">${a.type==='Movie'?'Movie':'TV'}</span>
+              <span class="rank-eps">${a.totalEpisodes} eps</span>
+            </div>
+            <span class="rank-rating">&#9733; ${a.rating.toFixed(1)}</span>
+          </div>
+        </a>`).join('')}
+    </div>
+  </aside>`;
 }
 
 function genreChips(){
@@ -172,14 +219,20 @@ function homePage(){
   const popular  = animeData.filter(a=>a.isPopular).slice(0,8);
   const classic  = animeData.filter(a=>a.isClassic).slice(0,8);
   const recent   = animeData.filter(a=>a.isRecentlyAdded).slice(0,8);
-  return layout(`${hero()}${genreChips()}
-    <div class="home-showcase">
-      ${section('ᴛʀᴇɴᴅɪɴɢ ɴᴏᴡ','Top picks from the AniMiko library.',rowCards(trending))}
-      ${section('ʟᴀᴛᴇsᴛ ᴇᴘɪsᴏᴅᴇs','Fresh episode updates from ongoing series.',latestList())}
-      ${section('ᴘᴏᴘᴜʟᴀʀ ᴀɴɪᴍᴇ','Most watched titles from new and classic shows.',rowCards(popular))}
-      ${section('ᴄʟᴀssɪᴄ ᴘɪᴄᴋs','Timeless anime from every era.',rowCards(classic))}
-      ${section('ʀᴇᴄᴇɴᴛʟʏ ᴀᴅᴅᴇᴅ','Recently updated titles in the library.',rowCards(recent))}
-    </div>${premium()}`,'Home');
+  return layout(`
+    ${hero()}
+    ${genreChips()}
+    <div class="home-layout">
+      <div class="home-main">
+        ${section('ᴛʀᴇɴᴅɪɴɢ ɴᴏᴡ','Top picks from the AniMiko library.',rowCards(trending))}
+        ${section('ʟᴀᴛᴇsᴛ ᴇᴘɪsᴏᴅᴇs','Fresh episode updates from ongoing series.',latestList())}
+        ${section('ᴘᴏᴘᴜʟᴀʀ ᴀɴɪᴍᴇ','Most watched titles from new and classic shows.',rowCards(popular))}
+        ${section('ᴄʟᴀssɪᴄ ᴘɪᴄᴋs','Timeless anime from every era.',rowCards(classic))}
+        ${section('ʀᴇᴄᴇɴᴛʟʏ ᴀᴅᴅᴇᴅ','Recently updated titles in the library.',rowCards(recent))}
+        ${premium()}
+      </div>
+      ${topRankings()}
+    </div>`,'Home');
 }
 
 function filterAnime(){
